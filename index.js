@@ -208,7 +208,6 @@ app.post("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) 
   const mailOptions = {
     from: SENDER,
     to: RECEIVER,
-    replyTo: data.email || SENDER,
     subject: `Sales Collateral — ${data.salesAdvisor} / ${data.store} — ${clientName}`,
     html: buildEmailHtml(data),
   };
