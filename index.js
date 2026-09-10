@@ -18,21 +18,22 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || DEFAULT_ORIGINS.join(","
   .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);
 
-const SALES_ADVISORS = [
-  "Jessica",
-  "Sara",
-  "Kadidja",
-  "Courtney",
-  "Jordan",
-  "Kristy",
-  "Dylan",
-  "Lilie",
-  "Jane",
-  "Charman",
-  "Chanda",
-  "Yorlan",
-  "Alexandra",
-];
+const SALES_ADVISOR_EMAILS = {
+  Alexandra: "alexandra@jeandousset.com",
+  Sara: "sara@jeandousset.com",
+  Jessica: "jessica@jeandousset.com",
+  Dylan: "dylan@jeandousset.com",
+  Kadidja: "kadidja@jeandousset.com",
+  Kristy: "kristy@jeandousset.com",
+  Jordan: "jordan@jeandousset.com",
+  Courtney: "courtney@jeandousset.com",
+  Charman: "charman@jeandousset.com",
+  Yorlan: "yorland@jeandousset.com",
+  Yorland: "yorland@jeandousset.com",
+  Lilie: "",
+  Jane: "",
+  Chanda: "",
+};
 
 const STORES = [
   "Westfield Valley Fair",
@@ -120,6 +121,26 @@ function trimValue(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function resolveSalesAdvisor(value) {
+  const raw = trimValue(value);
+  if (!raw) return null;
+
+  const entries = Object.entries(SALES_ADVISOR_EMAILS);
+  const lower = raw.toLowerCase();
+  const exact = entries.find(([name]) => name.toLowerCase() === lower);
+  if (exact) {
+    return { name: exact[0], email: exact[1] };
+  }
+
+  const firstName = lower.split(/\s+/)[0];
+  const byFirstName = entries.find(([name]) => name.toLowerCase() === firstName);
+  if (byFirstName) {
+    return { name: byFirstName[0], email: byFirstName[1] };
+  }
+
+  return null;
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -151,7 +172,7 @@ function validateForm(data) {
 
   if (!data.salesAdvisor) {
     errors.push("Please select a sales advisor.");
-  } else if (!SALES_ADVISORS.includes(data.salesAdvisor)) {
+  } else if (!resolveSalesAdvisor(data.salesAdvisor)) {
     errors.push("Please select a valid sales advisor.");
   }
 
@@ -205,9 +226,17 @@ app.post("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) 
   }
 
   const clientName = data.name || "New client";
+  const advisor = resolveSalesAdvisor(data.salesAdvisor);
+  const recipients = [RECEIVER];
+  const advisorEmail = advisor && advisor.email;
+
+  if (advisorEmail && advisorEmail.toLowerCase() !== RECEIVER.toLowerCase()) {
+    recipients.push(advisorEmail);
+  }
+
   const mailOptions = {
     from: SENDER,
-    to: RECEIVER,
+    to: recipients.join(", "),
     subject: `Sales Collateral — ${data.salesAdvisor} / ${data.store} — ${clientName}`,
     html: buildEmailHtml(data),
   };
