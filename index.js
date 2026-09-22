@@ -19,20 +19,19 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || DEFAULT_ORIGINS.join(","
   .filter(Boolean);
 
 const SALES_ADVISOR_EMAILS = {
-  Alexandra: "alexandra@jeandousset.com",
-  Sara: "sara@jeandousset.com",
   Jessica: "jessica@jeandousset.com",
-  Dylan: "dylan@jeandousset.com",
+  Sara: "sara@jeandousset.com",
   Kadidja: "kadidja@jeandousset.com",
-  Kristy: "kristy@jeandousset.com",
-  Jordan: "jordan@jeandousset.com",
   Courtney: "courtney@jeandousset.com",
+  Jordan: "jordan@jeandousset.com",
+  Kristy: "kristy@jeandousset.com",
+  Dylan: "dylan@jeandousset.com",
+  Lilie: "lilia@jeandousset.com",
+  Jane: "jane@jeandousset.com",
   Charman: "charman@jeandousset.com",
-  Yorlan: "yorland@jeandousset.com",
-  Yorland: "yorland@jeandousset.com",
-  Lilie: "",
-  Jane: "",
-  Chanda: "",
+  Chanda: "chanda@jeandousset.com",
+  Yorlan: "yorlan@jeandousset.com",
+  Alexandra: "alexandra@jeandousset.com",
 };
 
 const STORES = [
