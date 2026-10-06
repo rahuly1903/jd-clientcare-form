@@ -2,10 +2,17 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
+const FormData = require("./models/formData");
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+mongoose
+  .connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 const SENDER = process.env.SENDER || "clientcare@jeandousset.com";
 const RECEIVER = process.env.RECEIVER || "clientcare@jeandousset.com";
@@ -224,6 +231,11 @@ app.post("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) 
     return;
   }
 
+  if (!process.env.MONGODB_URI || !process.env.DB_NAME) {
+    res.status(500).json({ ok: false, msg: "Database is not configured." });
+    return;
+  }
+
   const clientName = data.name || "New client";
   const advisor = resolveSalesAdvisor(data.salesAdvisor);
   const recipients = [RECEIVER];
@@ -241,11 +253,25 @@ app.post("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) 
   };
 
   try {
+    await new FormData({
+      formData: data,
+      formType: "sales-collateral",
+    }).save();
+  } catch (error) {
+    console.error("Sales collateral save error:", error);
+    res.status(500).json({ ok: false, msg: "Error saving form data" });
+    return;
+  }
+
+  try {
     await transporter.sendMail(mailOptions);
     res.json({ ok: true, msg: "Mail sent successfully" });
   } catch (error) {
     console.error("Sales collateral mail error:", error);
-    res.status(500).json({ ok: false, msg: "Error sending mail" });
+    res.status(500).json({
+      ok: false,
+      msg: "Form data saved, but email failed to send",
+    });
   }
 });
 
