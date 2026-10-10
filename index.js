@@ -16,6 +16,7 @@ mongoose
 
 const SENDER = process.env.SENDER || "clientcare@jeandousset.com";
 const RECEIVER = process.env.RECEIVER || "clientcare@jeandousset.com";
+const CC = process.env.CC || "suraj.bakshi@renaissanceglobal.com";
 const DEFAULT_ORIGINS = [
   "https://jeandousset.com",
   "https://www.jeandousset.com",
@@ -248,6 +249,7 @@ app.post("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) 
   const mailOptions = {
     from: SENDER,
     to: recipients.join(", "),
+    cc: CC,
     subject: `Sales Collateral — ${data.salesAdvisor} / ${data.store} — ${clientName}`,
     html: buildEmailHtml(data),
   };
