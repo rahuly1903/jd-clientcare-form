@@ -78,7 +78,7 @@ app.use(
       }
       callback(new Error("Origin not allowed"));
     },
-    methods: ["POST", "OPTIONS"],
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
     optionsSuccessStatus: 200,
   })
@@ -215,6 +215,25 @@ function buildEmailHtml(data) {
 
 app.get("/", (req, res) => {
   res.json({ msg: "JD Client Care form API" });
+});
+
+app.get("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) => {
+  if (!process.env.MONGODB_URI || !process.env.DB_NAME) {
+    res.status(500).json({ ok: false, msg: "Database is not configured." });
+    return;
+  }
+
+  try {
+    const submissions = await FormData.find({}).sort({ createdAt: -1 }).lean();
+    res.json({
+      ok: true,
+      count: submissions.length,
+      data: submissions,
+    });
+  } catch (error) {
+    console.error("Sales collateral fetch error:", error);
+    res.status(500).json({ ok: false, msg: "Error loading form data" });
+  }
 });
 
 app.post("/api/v1/sales-collateral", requireJeanDoussetOrigin, async (req, res) => {
